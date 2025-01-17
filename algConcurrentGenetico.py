@@ -189,7 +189,7 @@ def init_alg_gen(
 
     plot_ax.clear()
     plot_ax.plot(x_values, y_values, label="f(x)", color="blue")
-    plot_ax.set_title("Algoritmo Genético y f(x)")
+    plot_ax.set_title("Evolución de la Población")
     plot_ax.set_xlabel("X")
     plot_ax.set_ylabel("f(x)")
     plot_ax.legend()
@@ -230,9 +230,6 @@ def init_alg_gen(
         worst_fitness_history.append(current_worst)
         avg_fitness_history.append(current_avg)
 
-        best_x = alg_gen.best_x
-        best_y = alg_gen.best_fitness
-
         plot_ax.clear()
         plot_ax.plot(x_values, y_values, label="f(x)", color="blue")
         plot_ax.set_title("Algoritmo Genético y f(x)")
@@ -263,14 +260,30 @@ def init_alg_gen(
         fitness_ax.plot(iterations, avg_fitness_history, label="Promedio", color="blue")
         fitness_ax.legend()
 
-        best_x_label.config(text=f"Mejor x: {best_x}")
-        best_fx_label.config(text=f"Mejor f(x): {best_y:.4f}")
-        delta_system_label.config(
-            text=f"Delta del sistema: {alg_gen.delta_system:.4f}"
+        best_x_label.configure(
+            text=f"Mejor x: {alg_gen.best_x:.6f}", 
+            style=header_type
         )
-        num_points_label.config(text=f"Cantidad de puntos: {alg_gen.n_points}")
-        num_bits_label.config(text=f"Cantidad de bits: {alg_gen.bits}")
-        string_bits_label.config(text=f"Cadena de bits: {alg_gen.best_solution}")
+        best_fx_label.configure(
+            text=f"Mejor f(x): {alg_gen.best_fitness:.6f}", 
+            style=header_type
+        )
+        delta_system_label.configure(
+            text=f"Delta del sistema: {alg_gen.delta_system:.6f}", 
+            style=header_type
+        )
+        num_points_label.configure(
+            text=f"Cantidad de puntos: {alg_gen.n_points}", 
+            style=header_type
+        )
+        num_bits_label.configure(
+            text=f"Cantidad de bits: {alg_gen.bits}", 
+            style=header_type
+        )
+        string_bits_label.configure(
+            text=f"Cadena de bits: {alg_gen.best_solution}", 
+            style=header_type
+        )
 
         canvas.draw()
 
@@ -313,13 +326,35 @@ def start_algorithm():
         tk.messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos")
 
 
+# Configuración inicial de la ventana
 root = tk.Tk()
 root.title("Algoritmo Genetico Concurrente - 223200")
-root.geometry("900x900")
+root.geometry("1200x900")  # Aumentado el ancho para acomodar ambas columnas
 
-main_frame = ttk.Frame(root, padding="10")
-main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+# Crear un frame contenedor principal
+container_frame = ttk.Frame(root, padding="10")
+container_frame.grid(row=0, column=0, sticky='nsew')
 
+# Configurar los pesos de las columnas y filas del root
+root.grid_columnconfigure(0, weight=1)
+root.grid_rowconfigure(0, weight=1)
+
+# Crear el frame para los controles (izquierda)
+main_frame = ttk.Frame(container_frame, padding="10")
+main_frame.grid(row=0, column=0, sticky='nsew')
+
+# Configurar los pesos de las columnas del container_frame
+container_frame.grid_columnconfigure(0, weight=0)  # columna de controles
+container_frame.grid_columnconfigure(1, weight=1)  # columna de gráficas
+
+# Crear los estilos
+style = ttk.Style()
+header_type = 'Header.TLabel'
+style.configure('Large.TLabel', font=('Helvetica', 12))
+style.configure(header_type, font=('Helvetica', 14, 'bold'))
+style.configure('Large.TButton', font=('Helvetica', 12))
+
+# Campos de entrada
 fields = [
     ("Delta", "delta_entry"),
     ("Intervalo Min", "interval_min_entry"),
@@ -334,11 +369,14 @@ fields = [
 
 entries = {}
 for i, (label, var_name) in enumerate(fields):
-    ttk.Label(main_frame, text=label).grid(row=i, column=0, sticky=tk.W, pady=2)
-    entry = ttk.Entry(main_frame, width=20)
-    entry.grid(row=i, column=1, pady=2)
+    ttk.Label(main_frame, text=label, style='Large.TLabel').grid(
+        row=i, column=0, sticky=tk.W, pady=5, padx=10
+    )
+    entry = ttk.Entry(main_frame, width=25, font=('Helvetica', 11))
+    entry.grid(row=i, column=1, pady=5, padx=10)
     entries[var_name] = entry
 
+# Desempaquetar las entradas
 (
     delta_entry,
     interval_min_entry,
@@ -351,35 +389,62 @@ for i, (label, var_name) in enumerate(fields):
     bit_mutation_rate_entry,
 ) = entries.values()
 
-start_button = ttk.Button(main_frame, text="Iniciar", command=start_algorithm)
-start_button.grid(row=len(fields), column=0, columnspan=2, pady=20)
-
-best_x_label = ttk.Label(main_frame, text="Mejor x: ---")
-best_x_label.grid(row=len(fields) + 1, column=0, columnspan=2, sticky=tk.W, pady=5)
-
-best_fx_label = ttk.Label(main_frame, text="Mejor f(x): ---")
-best_fx_label.grid(row=len(fields) + 2, column=0, columnspan=2, sticky=tk.W, pady=5)
-
-delta_system_label = ttk.Label(main_frame, text="Delta del sistema: ---")
-delta_system_label.grid(
-    row=len(fields) + 3, column=0, columnspan=2, sticky=tk.W, pady=5
+# Botón de inicio
+start_button = ttk.Button(
+    main_frame, 
+    text="Iniciar", 
+    command=start_algorithm, 
+    style='Large.TButton'
+)
+start_button.grid(
+    row=len(fields), 
+    column=0, 
+    columnspan=2, 
+    pady=25,
+    padx=10,
+    sticky='ew'
 )
 
-num_points_label = ttk.Label(main_frame, text="Cantidad de puntos: ---")
-num_points_label.grid(row=len(fields) + 4, column=0, columnspan=2, sticky=tk.W, pady=5)
+# Labels de resultados
+best_x_label = ttk.Label(main_frame)
+best_fx_label = ttk.Label(main_frame)
+delta_system_label = ttk.Label(main_frame)
+num_points_label = ttk.Label(main_frame)
+num_bits_label = ttk.Label(main_frame)
+string_bits_label = ttk.Label(main_frame)
 
-num_bits_label = ttk.Label(main_frame, text="Cantidad de bits: ---")
-num_bits_label.grid(row=len(fields) + 5, column=0, columnspan=2, sticky=tk.W, pady=5)
+result_labels = [
+    (best_x_label, "Mejor x: ---"),
+    (best_fx_label, "Mejor f(x): ---"),
+    (delta_system_label, "Delta del sistema: ---"),
+    (num_points_label, "Cantidad de puntos: ---"),
+    (num_bits_label, "Cantidad de bits: ---"),
+    (string_bits_label, "Cadena de bits: ---")
+]
 
-string_bits_label = ttk.Label(main_frame, text="Cadena de bits: ---")
-string_bits_label.grid(row=len(fields) + 6, column=0, columnspan=2, sticky=tk.W, pady=5)
+for i, (label, text) in enumerate(result_labels):
+    label.configure(
+        text=text, 
+        style=header_type,
+        padding=(10, 5)
+    )
+    label.grid(
+        row=len(fields) + 1 + i, 
+        column=0, 
+        columnspan=2, 
+        sticky=tk.W, 
+        pady=8,
+        padx=10
+    )
 
+# Configurar las gráficas
+fig, (ax, fitness_ax) = plt.subplots(2, 1, figsize=(8, 8))
+fig.tight_layout(pad=3.0)
+plt.subplots_adjust(hspace=0.4)
 
-fig, (ax, fitness_ax) = plt.subplots(2, 1, figsize=(6, 4))
-fig.tight_layout()
-plt.subplots_adjust(hspace=0.5)
-canvas = FigureCanvasTkAgg(fig, master=root)
+# Crear y posicionar el canvas de matplotlib
+canvas = FigureCanvasTkAgg(fig, master=container_frame)
 canvas_widget = canvas.get_tk_widget()
-canvas_widget.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+canvas_widget.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
 root.mainloop()
